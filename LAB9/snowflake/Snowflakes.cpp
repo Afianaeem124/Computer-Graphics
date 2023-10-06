@@ -1,65 +1,71 @@
 #include <GL/glut.h>
-#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <math.h>
+#include "Canvas.h"
 
-const int WINDOW_WIDTH = 600;
-const int WINDOW_HEIGHT = 600;
-const float SCALE_FACTOR = 5.0; // Increase the scale factor for a bigger pattern
-const float LINE_WIDTH = 0.2; // Decrease line width for thinner flakes
+#define TWOPI 2*3.14159265
 
-void drawFlakeMotif() {
-    glLineWidth(LINE_WIDTH);
-    glBegin(GL_LINE_STRIP);
-    glVertex2f(0, 5);
-    glVertex2f(20, 5);
-    glVertex2f(30, 25);
-    glVertex2f(35, 18);
-    glVertex2f(25, 5);
-    glVertex2f(30, 5);
-    glVertex2f(40, 15);
-    glVertex2f(50, 13);
-    glVertex2f(35, 5);
-    glVertex2f(55, 5);
-    glVertex2f(60, 0);
-    glEnd();
+const int SCREENWIDTH = 680;
+const int SCREENHEIGHT = 480;
+
+Point2 CP1;
+Canvas cvs(SCREENWIDTH, SCREENHEIGHT, "Snowflake");
+
+void snowflakemotif(float L) {
+	cvs.moveTo(0.0, 0.1 * L);
+	cvs.turnTo(0);
+	cvs.forward(2 * L, 1);
+	cvs.turn(60);
+	cvs.forward(1 * L, 1);
+	cvs.turn(270);
+	cvs.forward(0.2 * L, 1);
+	cvs.turn(270);
+	cvs.forward(0.9 * L, 1);
+	cvs.turn(120);
+	cvs.forward(1 * L, 1);
+	cvs.turn(60);
+	cvs.forward(0.9 * L, 1);
+	cvs.turn(270);
+	cvs.forward(0.2 * L, 1);
+	cvs.turn(270);
+	cvs.forward(0.8 * L, 1);
+	cvs.turn(120);
+	cvs.forward(1 * L, 1);
+	cvs.turn(330);
+	cvs.forward(0.2 * L, 1);
+	cvs.turn(30);
+}
+void snowflake(float L) {
+	glTranslatef(SCREENWIDTH / 2.0, SCREENHEIGHT / 2.0, 0.0);
+	for (int count = 0; count < 6; count++) // draw a snowflake
+	{
+		snowflakemotif(L);
+		cvs.scale2D(1.0, -1.0);
+		snowflakemotif(L);
+		cvs.scale2D(1.0, -1.0);
+		cvs.rotate2D(60.0); // concatenate a 60 degree rotation
+	}
+
+}
+void myInit(void) {
+	glClearColor(1.0, 1.0, 1.0, 0.0);  // set white background color
+	glColor3f(0.0f, 0.0f, 0.0f);  // set the drawing color
+	glPointSize(2.0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 }
 
-void display() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(0.678f, 0.847f, 0.902f); // Set color to blue
+void myDisplay(void) {
+	glClear(GL_COLOR_BUFFER_BIT);
+	cvs.setWindow(0.0, SCREENWIDTH, 0.0, SCREENHEIGHT);
+	cvs.setViewport(0, SCREENWIDTH, 0, SCREENHEIGHT);
+	snowflake(50.0);
 
-    glPushMatrix(); // Save the current matrix
-    glTranslatef(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0); // Center the snowflake
-    glScalef(SCALE_FACTOR, SCALE_FACTOR, 1.0); // Increase the pattern size
-    for (int count = 0; count < 6; count++) {
-        drawFlakeMotif();
-        glScalef(1.0, -1.0, 1.0); // Reflect vertically
-        drawFlakeMotif();
-        glScalef(1.0, -1.0, 1.0); // Restore original axis
-        glRotatef(60.0, 0.0, 0.0, 1.0); // Rotate for the next spoke
-    }
-    glPopMatrix(); // Restore the original matrix
-
-    glFlush();
+	glFlush();
 }
-
-void init() {
-    glClearColor(0.0, 0.0, 0.0, 1.0); // Set clear color to black
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT);
-}
-
-int main(int argc, char** argv) {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow("Snowflake");
-
-    init();
-
-    glutDisplayFunc(display);
-    glutMainLoop();
-
-    return 0;
+void main(int argc, char** argv) {
+	glutDisplayFunc(myDisplay);
+	myInit();
+	glutMainLoop();
 }
